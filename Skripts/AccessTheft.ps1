@@ -21,5 +21,5 @@
 .OUTPUTS
     txt file
 .NOTES
-    new
+    ne
 #>
