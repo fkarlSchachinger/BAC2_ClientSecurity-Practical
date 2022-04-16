@@ -17,9 +17,9 @@
     PS C:\> <example usage>
     Explanation of what the example does
 .INPUTS
-    Inputs (if any)
+    None
 .OUTPUTS
-    Output (if any)
+    txt file
 .NOTES
-    General notes
+    new
 #>
