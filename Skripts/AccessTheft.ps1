@@ -14,7 +14,8 @@
 .DESCRIPTION
     Sets Auto-Lock Screen Registry
 .EXAMPLE
-    PS C:\> <example usage>
+    PS C:\> . ./AccessTheft.ps1 
+    PS C:\> InitiateMitigations
     Explanation of what the example does
 .INPUTS
     None
@@ -23,3 +24,10 @@
 .NOTES
     ne
 #>
+function InitiateMitigations {
+    $end = "Finished"
+    Write-Verbose -Message "Starting Skript:"
+    New-ItemProperty -Path "HKCU\Software\Policies\Microsoft\Windows\Control Panel\Desktop" -Name "ScreenSaverTimeOut" -Value "500" -PropertyType "String"
+   
+    return $end
+}
