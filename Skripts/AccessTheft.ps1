@@ -39,5 +39,9 @@ function InitiateMitigations {
     #Disable Device Installation
     Set-GPRegistryValue -Name "Access_Mitigations" -Key "HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\DeviceInstall\Restrictions" -ValueName "DenyRemovableDevices" -Value 1 -Type DWord
     #Disabling automatic hotspot connections have to be done manually in GPO
+    #Therefore importing pre-prepared GPO
+    $directory = Get-Location
+    $path = Join-Path -Path $directory -ChildPath '\GPO\'
+    Import-GPO -BackupId E4DEFC66-A99C-4990-AA3F-FFA82C864C89 -TargetName Access_Mitigations -path 'C:\Users\Franz\Desktop\Skripts\gpo' -CreateIfNeeded -Domain "Test.local"
     return $end
 }
