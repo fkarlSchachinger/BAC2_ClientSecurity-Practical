@@ -69,7 +69,7 @@ function InitiateMitigations {
     $GPO_Bitlocker = New-GPO -Name "Bitlocker" -Comment "Settings for the BitLocker feature"
     Import-GPO -BackupId DD8002A9-45F4-4BFB-97F4-E2E8AEAFC5C6 -TargetName Access_Mitigations -path $pathGPO.ToString() -CreateIfNeeded -Domain "Test.local"
     New-GPLink -Guid $GPO_Access.Id -Target "OU=Employees,$((Get-AdDomain).DistinguishedName)" -LinkEnabled Yes -Order 1
-
+    #test Bitlocker Policy
     
     return $end
 }
