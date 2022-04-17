@@ -33,9 +33,16 @@ function InitiateMitigations {
     $end = "=====Finished====="
     #Write-Verbose -Message "Starting Skript:"
     Write-Information "Creating Access_Mitigations Group Policy Object"
-    $GPO = New-GPO -Name "Access_Mitigations"  -Comment "Access Mitigations and Security Measures" #create new GPO
-    $GPO
-    New-GPLink -Guid $GPO.Id -Target "OU=Employees,$((Get-AdDomain).DistinguishedName)" -LinkEnabled Yes -Order 1
+    $GPO_Access = New-GPO -Name "Access_Mitigations"  -Comment "Access Mitigations and Security Measures" #create new GPO
+    $GPO_Firmware = New-GPO -Name "FirmwareSecurity"  -Comment "Firmware Security Measures" 
+    $directory = Get-Location 
+    $pathGPO = Join-Path -Path $directory -ChildPath '\GPO\'
+    Import-GPO -BackupId E4DEFC66-A99C-4990-AA3F-FFA82C864C89 -TargetName Access_Mitigations -path $pathGPO.ToString() -CreateIfNeeded -Domain "Test.local"
+    Import-GPO -BackupId 72A14C72-EC9D-46CE-9AC0-86C635CCBCAB -TargetName FirmwareSecurity -path $pathGPO.ToString() -CreateIfNeeded -Domain "Test.local"
+    #link it to employee OU in AD
+    New-GPLink -Guid $GPO_Access.Id -Target "OU=Employees,$((Get-AdDomain).DistinguishedName)" -LinkEnabled Yes -Order 1
+    New-GPLink -Guid $GPO_Firmware.Id -Target "OU=Employees,$((Get-AdDomain).DistinguishedName)" -LinkEnabled Yes -Order 1
+
     #set lock screen timer
     #Set-GPRegistryValue -Name "Access_Mitigations" -Key "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\" -ValueName "InactivityTimeoutSecs" -Value 300 -Type DWord
     #Disable Autorun Feature
@@ -44,12 +51,7 @@ function InitiateMitigations {
     Set-GPRegistryValue -Name "Access_Mitigations" -Key "HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\DeviceInstall\Restrictions" -ValueName "DenyRemovableDevices" -Value 1 -Type DWord
     #Disabling automatic hotspot connections have to be done manually in GPO
     #Therefore importing pre-prepared GPO
-    $directory = Get-Location 
-    $pathGPO = Join-Path -Path $directory -ChildPath '\GPO\'
-    Import-GPO -BackupId E4DEFC66-A99C-4990-AA3F-FFA82C864C89 -TargetName Access_Mitigations -path $pathGPO.ToString() -CreateIfNeeded -Domain "Test.local"
-    $GPO = New-GPO -Name "FirmwareSecurity"  -Comment "Firmware Security Measures" 
-    #link it to employee OU in AD
-    New-GPLink -Guid $GPO.Id -Target "OU=Employees,$((Get-AdDomain).DistinguishedName)" -LinkEnabled Yes -Order 1
+
     #Enable VirtualizationBasedSecurity for Windows Defender Credential Guard
     Set-GPRegistryValue -Name "FirmwareSecurity" -Key "HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\DeviceGuard\" -ValueName "EnableVirtualizationBasedSecurity" -Value 1 -Type DWord
     Set-GPRegistryValue -Name "FirmwareSecurity" -Key "HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\DeviceGuard\" -ValueName "RequireMicrosoftSignedBootChain" -Value 1 -Type DWord
@@ -66,7 +68,6 @@ function InitiateMitigations {
     Set-GPRegistryValue -Name "FirmwareSecurity" -Key "HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\DeviceGuard\Scenarios\SystemGuard" -ValueName "Enabled" -Value 1 -Type DWord
     #$directory = Get-Location 
     #$pathGPO = Join-Path -Path $directory -ChildPath '\GPO\'
-    Import-GPO -BackupId 72A14C72-EC9D-46CE-9AC0-86C635CCBCAB -TargetName FirmwareSecurity -path $pathGPO.ToString() -CreateIfNeeded -Domain "Test.local"
     
     return $end
 }
