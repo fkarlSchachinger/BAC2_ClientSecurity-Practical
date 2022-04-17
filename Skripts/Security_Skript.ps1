@@ -37,20 +37,19 @@ function InitiateMitigations {
     $GPO_Firmware = New-GPO -Name "FirmwareSecurity"  -Comment "Firmware Security Measures" 
     $directory = Get-Location 
     $pathGPO = Join-Path -Path $directory -ChildPath '\GPO\'
+    #Disabling automatic hotspot connections have to be done manually in GPO
+    #Therefore importing pre-prepared GPO
     Import-GPO -BackupId E4DEFC66-A99C-4990-AA3F-FFA82C864C89 -TargetName Access_Mitigations -path $pathGPO.ToString() -CreateIfNeeded -Domain "Test.local"
     Import-GPO -BackupId 72A14C72-EC9D-46CE-9AC0-86C635CCBCAB -TargetName FirmwareSecurity -path $pathGPO.ToString() -CreateIfNeeded -Domain "Test.local"
     #link it to employee OU in AD
     New-GPLink -Guid $GPO_Access.Id -Target "OU=Employees,$((Get-AdDomain).DistinguishedName)" -LinkEnabled Yes -Order 1
     New-GPLink -Guid $GPO_Firmware.Id -Target "OU=Employees,$((Get-AdDomain).DistinguishedName)" -LinkEnabled Yes -Order 1
-
     #set lock screen timer
     #Set-GPRegistryValue -Name "Access_Mitigations" -Key "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\" -ValueName "InactivityTimeoutSecs" -Value 300 -Type DWord
     #Disable Autorun Feature
     Set-GPRegistryValue -Name "Access_Mitigations" -Key "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\" -ValueName "NoDriveTypeAutoRun" -Value 1 -Type DWord
     #Disable Device Installation
     Set-GPRegistryValue -Name "Access_Mitigations" -Key "HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\DeviceInstall\Restrictions" -ValueName "DenyRemovableDevices" -Value 1 -Type DWord
-    #Disabling automatic hotspot connections have to be done manually in GPO
-    #Therefore importing pre-prepared GPO
 
     #Enable VirtualizationBasedSecurity for Windows Defender Credential Guard
     Set-GPRegistryValue -Name "FirmwareSecurity" -Key "HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\DeviceGuard\" -ValueName "EnableVirtualizationBasedSecurity" -Value 1 -Type DWord
@@ -66,8 +65,11 @@ function InitiateMitigations {
         New-Item -Path "Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\DeviceGuard\Scenarios\" -Name "SystemGuard"
     }
     Set-GPRegistryValue -Name "FirmwareSecurity" -Key "HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\DeviceGuard\Scenarios\SystemGuard" -ValueName "Enabled" -Value 1 -Type DWord
-    #$directory = Get-Location 
-    #$pathGPO = Join-Path -Path $directory -ChildPath '\GPO\'
+    #Bitlocker Policy creation, import of Predefined Settings and Link to Employee OU in AD
+    $GPO_Bitlocker = New-GPO -Name "Bitlocker" -Comment "Settings for the BitLocker feature"
+    Import-GPO -BackupId DD8002A9-45F4-4BFB-97F4-E2E8AEAFC5C6 -TargetName Access_Mitigations -path $pathGPO.ToString() -CreateIfNeeded -Domain "Test.local"
+    New-GPLink -Guid $GPO_Access.Id -Target "OU=Employees,$((Get-AdDomain).DistinguishedName)" -LinkEnabled Yes -Order 1
+
     
     return $end
 }
