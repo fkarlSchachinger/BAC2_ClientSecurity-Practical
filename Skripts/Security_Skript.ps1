@@ -68,7 +68,7 @@ function InitiateMitigations {
     #Bitlocker enabling Skript
     .\Security_Skript.ps1
     #Skript can be found on Github and should be downloaded
-
     
+
     return $end
 }
