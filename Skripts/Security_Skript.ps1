@@ -80,5 +80,10 @@ function InitiateMitigations {
 
 
 
+
+    #End of Measures, disable the admin account
+    $user = whoami.exe | Out-String
+    $userTrimmed = $user.Split("\")
+    #net user $userTrimmed /active:no
     return $end
 }
