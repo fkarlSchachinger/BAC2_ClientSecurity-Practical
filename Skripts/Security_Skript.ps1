@@ -42,8 +42,8 @@ function InitiateMitigations {
     Import-GPO -BackupId E4DEFC66-A99C-4990-AA3F-FFA82C864C89 -TargetName Access_Mitigations -path $pathGPO.ToString() -CreateIfNeeded -Domain "Test.local"
     Import-GPO -BackupId 72A14C72-EC9D-46CE-9AC0-86C635CCBCAB -TargetName FirmwareSecurity -path $pathGPO.ToString() -CreateIfNeeded -Domain "Test.local"
     #link it to employee OU in AD
-    New-GPLink -Guid $GPO_Access.Id -Target "OU=Employees,$((Get-AdDomain).DistinguishedName)" -LinkEnabled Yes -Order 1
-    New-GPLink -Guid $GPO_Firmware.Id -Target "OU=Employees,$((Get-AdDomain).DistinguishedName)" -LinkEnabled Yes -Order 1
+    New-GPLink -Guid $GPO_Access.Id -Target "OU=CMPEmployees,$((Get-AdDomain).DistinguishedName)" -LinkEnabled Yes -Order 1
+    New-GPLink -Guid $GPO_Firmware.Id -Target "OU=CMPEmployees,$((Get-AdDomain).DistinguishedName)" -LinkEnabled Yes -Order 1
     #set lock screen timer
     #Set-GPRegistryValue -Name "Access_Mitigations" -Key "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\" -ValueName "InactivityTimeoutSecs" -Value 300 -Type DWord
     #Disable Autorun Feature
@@ -66,9 +66,19 @@ function InitiateMitigations {
     }
     Set-GPRegistryValue -Name "FirmwareSecurity" -Key "HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\DeviceGuard\Scenarios\SystemGuard" -ValueName "Enabled" -Value 1 -Type DWord
     #Bitlocker enabling Skript
-    .\Security_Skript.ps1
     #Skript can be found on Github and should be downloaded
-    
+    Write-Information 'Enabling BitLocker'
+    .\Security_Skript.ps1
+    #Create New User
+    Write-Information 'Startung User Creation Script'
+    .\CreateUser.ps1 
+    #Create and Import StandardUser Policy Settings
+    $GPO_StandardUser = New-GPO -Name "StandardUser"  -Comment "Default User Restrictions" 
+    Import-GPO -BackupId 12406D13-7B68-4143-A90B-3EDFBFDCA4D3 -TargetName StandardUser -path $pathGPO.ToString() -CreateIfNeeded -Domain "Test.local"
+    New-GPLink -Guid $GPO_StandardUser.Id -Target "OU=UsersEmployees,$((Get-AdDomain).DistinguishedName)" -LinkEnabled Yes -Order 1
+
+
+
 
     return $end
 }
