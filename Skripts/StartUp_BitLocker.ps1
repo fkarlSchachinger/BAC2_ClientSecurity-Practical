@@ -16,8 +16,8 @@ if($var.contains('Protection Status:    Protection Off')){
         Restart-Computer
     }else{
         Write-Host 'Reboot in 5 mins'
-        Start-Sleep -Seconds 300
-        Restart-Computer
+        #Start-Sleep -Seconds 300
+        #Restart-Computer
     }
 }else{
     Write-Host 'Already Encrypted'

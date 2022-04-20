@@ -30,7 +30,6 @@ function InitiateMitigations {
     Remove-Item .\GPO.zip
     Get-Module -ListAvailable GroupPolicy
     Get-Module GroupPolicy
-    $end = "=====Finished====="
     #Write-Verbose -Message "Starting Skript:"
     Write-Information "Creating Access_Mitigations Group Policy Object"
     $GPO_Access = New-GPO -Name "Access_Mitigations"  -Comment "Access Mitigations and Security Measures" #create new GPO
@@ -68,7 +67,7 @@ function InitiateMitigations {
     #Bitlocker enabling Skript
     #Skript can be found on Github and should be downloaded
     Write-Information 'Enabling BitLocker'
-    .\Security_Skript.ps1
+    .\StartUp_BitLocker.ps1
     #Create New User
     Write-Information 'Startung User Creation Script'
     .\CreateUser.ps1 
@@ -77,6 +76,10 @@ function InitiateMitigations {
     Import-GPO -BackupId 12406D13-7B68-4143-A90B-3EDFBFDCA4D3 -TargetName StandardUser -path $pathGPO.ToString() -CreateIfNeeded -Domain "Test.local"
     New-GPLink -Guid $GPO_StandardUser.Id -Target "OU=UsersEmployees,$((Get-AdDomain).DistinguishedName)" -LinkEnabled Yes -Order 1
 
+    #Implement ASR Rules Settings
+    .\SetASRRulesAndDefender.ps1
+    #Implement Credential Guard
+    Set-GPRegistryValue -Name "FirmwareSecurity" -Key "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa" -ValueName "LsaCfgFlags" -Value 1 -Type DWord
 
 
 
@@ -85,5 +88,5 @@ function InitiateMitigations {
     $user = whoami.exe | Out-String
     $userTrimmed = $user.Split("\")
     #net user $userTrimmed /active:no
-    return $end
+    .\Outro.ps1
 }
