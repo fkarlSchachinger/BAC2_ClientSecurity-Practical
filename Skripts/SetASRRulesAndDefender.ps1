@@ -24,4 +24,9 @@ Set-GPRegistryValue -Name "ASR_Rules" -Key "HKEY_LOCAL_MACHINE\SOFTWARE\Microsof
 Set-GPRegistryValue -Name "ASR_Rules" -Key "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules" -ValueName "92e97fa1-2edf-4476-bdd6-9dd0b4dddc7b" -Value 1 -Type DWord
 Set-GPRegistryValue -Name "ASR_Rules" -Key "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules" -ValueName "c1db55ab-c21a-4637-bb3f-a12568109d35" -Value 1 -Type DWord
 
-Write-Host '====================================Finished Defender SetUp'===================================='
+Write-Host '====================================Finished Defender SetUp===================================='
+
+#Implement File Redirection
+$GPO_FileRedirection = New-GPO -Name "ScriptRedirection" -Comment "Redirects common script files to notepad"
+Import-GPO -BackupId E962C0C0-70C9-4AC8-8D39-9955BC760896 -TargetName ScriptRedirection -path $pathGPO.ToString() -CreateIfNeeded -Domain "Test.local"
+New-GPLink -Guid $GPO_FileRedirection.Id -Target "OU=UsersEmployees,$((Get-AdDomain).DistinguishedName)" -LinkEnabled Yes -Order 1
