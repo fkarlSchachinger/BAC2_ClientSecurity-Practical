@@ -81,9 +81,6 @@ function InitiateMitigations {
     #Implement Credential Guard
     Set-GPRegistryValue -Name "FirmwareSecurity" -Key "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa" -ValueName "LsaCfgFlags" -Value 1 -Type DWord
 
-    #Implement Process Mitigations
-    Set-GPRegistryValue -Name "ScriptRedirection" -Key "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\MitigationOptions\ProcessMitigationOptions" -ValueName ""
-
     #Implement Applocker Rule
     $GPO_Applocker = New-GPO -Name "Applocker"  -Comment "Restrict Executables, Scripts, Installation" 
     Import-GPO -BackupId 4CE1D07A-ED97-4DA8-A257-1A81A7B1EA89 -TargetName Applocker -path $pathGPO.ToString() -CreateIfNeeded -Domain "Test.local"
@@ -95,9 +92,17 @@ function InitiateMitigations {
     $GPO_Edge = New-GPO -Name "MsEdgeBaseline"  -Comment "MS Edge Baseline by CIS" 
     Import-GPO -BackupId 29D42EA1-A2E0-46D9-AEC4-9913624497BE -TargetName MsEdgeBaseline -path $pathGPO.ToString() -CreateIfNeeded -Domain "Test.local"
     New-GPLink -Guid $GPO_Edge.Id -Target "OU=UsersEmployees,$((Get-AdDomain).DistinguishedName)" -LinkEnabled Yes -Order 1
+
+    #Finally Update the GPO's on the target client
+    Write-Host 'Input Remote Computer Name'
+    $name = Read-Host 
+    $cred = Get-Credential
+    Invoke-Command -ComputerName $name -Credential $cred -ScriptBlock{
+        gpupdate /force
+    }
+
     #End of Measures, disable the admin account
     $user = whoami.exe | Out-String
     $userTrimmed = $user.Split("\")
     #net user $userTrimmed /active:no
-    .\Outro.ps1
 }
