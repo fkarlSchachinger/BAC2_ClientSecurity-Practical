@@ -89,7 +89,7 @@ function InitiateMitigations {
     Import-GPO -BackupId 4CE1D07A-ED97-4DA8-A257-1A81A7B1EA89 -TargetName Applocker -path $pathGPO.ToString() -CreateIfNeeded -Domain "Test.local"
     New-GPLink -Guid $GPO_Applocker.Id -Target "OU=CMPEmployees,$((Get-AdDomain).DistinguishedName)" -LinkEnabled Yes -Order 1
 
-    
+    . .\ServicesAndProtocolls.ps1
 
     #End of Measures, disable the admin account
     $user = whoami.exe | Out-String
