@@ -13,10 +13,13 @@ Invoke-Command -ComputerName $name -Credential $cred -ScriptBlock{
         $new = Get-Service $item
         Set-Service -InputObject $new -StartUpType Disabled -Status Stopped 
     }
-    #Disable SMBv1
+    #Disable SMBv1 on Client
     Disable-WindowsOptionalFeature -Online -FeatureName SMB1Protocol
 
     #Set TLS to 1.2 Version
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    
+
 }
+
+#Disable SMBv1 on server
+Disable-WindowsOptionalFeature -Online -FeatureName SMB1Protocol

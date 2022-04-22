@@ -91,6 +91,10 @@ function InitiateMitigations {
 
     . .\ServicesAndProtocolls.ps1
 
+    #Import MS Edge Standard of CIS 
+    $GPO_Edge = New-GPO -Name "MsEdgeBaseline"  -Comment "MS Edge Baseline by CIS" 
+    Import-GPO -BackupId 29D42EA1-A2E0-46D9-AEC4-9913624497BE -TargetName MsEdgeBaseline -path $pathGPO.ToString() -CreateIfNeeded -Domain "Test.local"
+    New-GPLink -Guid $GPO_Edge.Id -Target "OU=UsersEmployees,$((Get-AdDomain).DistinguishedName)" -LinkEnabled Yes -Order 1
     #End of Measures, disable the admin account
     $user = whoami.exe | Out-String
     $userTrimmed = $user.Split("\")
