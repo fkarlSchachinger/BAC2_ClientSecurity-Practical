@@ -93,6 +93,11 @@ function InitiateMitigations {
     Import-GPO -BackupId 29D42EA1-A2E0-46D9-AEC4-9913624497BE -TargetName MsEdgeBaseline -path $pathGPO.ToString() -CreateIfNeeded -Domain "Test.local"
     New-GPLink -Guid $GPO_Edge.Id -Target "OU=UsersEmployees,$((Get-AdDomain).DistinguishedName)" -LinkEnabled Yes -Order 1
 
+    #Import Monitring and Auditing Rules
+    $GPO_Monitoring = New-GPO -Name "Monitoring"  -Comment "Monitoring and Auditing " 
+    Import-GPO -BackupId 69593844-2A90-4D43-8C34-DAF6EDEA01E8 -TargetName Monitoring -path $pathGPO.ToString() -CreateIfNeeded -Domain "Test.local"
+    New-GPLink -Guid $GPO_Monitoring.Id -Target "OU=UsersEmployees,$((Get-AdDomain).DistinguishedName)" -LinkEnabled Yes -Order 1
+    
     #Finally Update the GPO's on the target client
     Write-Host 'Input Remote Computer Name'
     $name = Read-Host 
